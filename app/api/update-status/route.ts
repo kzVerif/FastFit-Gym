@@ -23,13 +23,13 @@ export async function DELETE(
 // อัปเดตสมาชิก
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{id: string}> }
 ) {
   try {
     const body = await req.json()
 
     const updated = await prisma.subscriptions.update({
-      where: { id: Number(params.id) },
+      where: { id: Number(await params) },
       data: {
         name: body.name,
         tell: body.tell,
