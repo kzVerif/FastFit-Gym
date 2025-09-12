@@ -23,7 +23,7 @@ export default function SignupForm() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/subscriptions", {
+      const res = await fetch("https://fast-fit-gym.vercel.app/api/subscriptions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
