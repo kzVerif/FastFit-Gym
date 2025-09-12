@@ -7,11 +7,12 @@ const prisma = new PrismaClient()
 // ✅ GET: ดึงข้อมูลสมาชิกตาม id
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const user = await prisma.subscriptions.findUnique({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     })
 
     if (!user) {
@@ -28,13 +29,14 @@ export async function GET(
 // ✅ PUT: อัปเดตข้อมูลสมาชิก
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const body = await req.json()
 
     const updated = await prisma.subscriptions.update({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
       data: {
         name: body.name,
         tell: body.tell,
@@ -54,11 +56,12 @@ export async function PUT(
 // ✅ DELETE: ลบข้อมูลสมาชิก
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     await prisma.subscriptions.delete({
-      where: { id: Number(params.id) },
+      where: { id: Number(id) },
     })
 
     return NextResponse.json({ message: "Deleted" }, { status: 200 })
