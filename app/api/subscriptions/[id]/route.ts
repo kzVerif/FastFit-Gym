@@ -3,17 +3,16 @@ import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-interface RouteContext {
-  params: Promise<{ id: string }>
-}
-
 // ✅ GET: ดึงข้อมูลสมาชิกตาม id
 export async function GET(
   request: Request,
-  context: RouteContext
+  { params }: { params: any }
 ) {
   try {
-    const { id } = await context.params
+    // รองรับทั้ง sync และ async params
+    const resolvedParams = await Promise.resolve(params)
+    const { id } = resolvedParams
+    
     const user = await prisma.subscriptions.findUnique({
       where: { id: Number(id) },
     })
@@ -32,10 +31,12 @@ export async function GET(
 // ✅ PUT: อัปเดตข้อมูลสมาชิก
 export async function PUT(
   request: Request,
-  context: RouteContext
+  { params }: { params: any }
 ) {
   try {
-    const { id } = await context.params
+    // รองรับทั้ง sync และ async params
+    const resolvedParams = await Promise.resolve(params)
+    const { id } = resolvedParams
     const body = await request.json()
 
     const updated = await prisma.subscriptions.update({
@@ -59,10 +60,13 @@ export async function PUT(
 // ✅ DELETE: ลบข้อมูลสมาชิก
 export async function DELETE(
   request: Request,
-  context: RouteContext
+  { params }: { params: any }
 ) {
   try {
-    const { id } = await context.params
+    // รองรับทั้ง sync และ async params
+    const resolvedParams = await Promise.resolve(params)
+    const { id } = resolvedParams
+    
     await prisma.subscriptions.delete({
       where: { id: Number(id) },
     })
