@@ -11,30 +11,60 @@ export async function POST(req: NextRequest) {
       if (event.type === "message" && event.message.type === "text") {
         const tell = event.message.text.trim();
 
-        // 🔎 ค้นหาจาก Database (ตัวอย่างใช้ตาราง subscriptions)
+        // 🔎 ค้นหาจาก Database
         const member = await prisma.subscriptions.findFirst({
           where: { tell },
         });
 
         if (member) {
-          // ✅ ถ้ามีข้อมูล → ส่งกลับไปทาง LINE
-          const msg = `👤 ชื่อ: ${member.name}
+          const now = new Date();
+          const expired = now > member.endDate;
+
+          if (expired) {
+            // 📝 อัพเดท Database → ให้สถานะเป็น expired
+            await prisma.subscriptions.update({
+              where: { id: member.id },
+              data: { status: "expired" },
+            });
+
+            // ❌ ตอบกลับ LINE
+            const msg = `👤 ชื่อ: ${member.name}
 📞 เบอร์: ${member.tell}
 📅 วันที่เริ่มต้น: ${member.startDate.toISOString().split("T")[0]}
 ⏳ วันหมดอายุ: ${member.endDate.toISOString().split("T")[0]}
-⭐ สถานะ: ${new Date() > member.endDate ? "❌ หมดอายุ" : "✅ ใช้งานได้"}`;
+❌ สถานะ: หมดอายุแล้ว (อัพเดทในระบบเรียบร้อย)`; 
 
-          await fetch("https://api.line.me/v2/bot/message/reply", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
-            },
-            body: JSON.stringify({
-              replyToken: event.replyToken,
-              messages: [{ type: "text", text: msg }],
-            }),
-          });
+            await fetch("https://api.line.me/v2/bot/message/reply", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+              },
+              body: JSON.stringify({
+                replyToken: event.replyToken,
+                messages: [{ type: "text", text: msg }],
+              }),
+            });
+          } else {
+            // ✅ ถ้ายังไม่หมดอายุ
+            const msg = `👤 ชื่อ: ${member.name}
+📞 เบอร์: ${member.tell}
+📅 วันที่เริ่มต้น: ${member.startDate.toISOString().split("T")[0]}
+⏳ วันหมดอายุ: ${member.endDate.toISOString().split("T")[0]}
+✅ สถานะ: ใช้งานได้`;
+
+            await fetch("https://api.line.me/v2/bot/message/reply", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.LINE_CHANNEL_ACCESS_TOKEN}`,
+              },
+              body: JSON.stringify({
+                replyToken: event.replyToken,
+                messages: [{ type: "text", text: msg }],
+              }),
+            });
+          }
         } else {
           // ❌ ถ้าไม่เจอเบอร์
           await fetch("https://api.line.me/v2/bot/message/reply", {
