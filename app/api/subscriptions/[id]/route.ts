@@ -1,20 +1,18 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
+import type { NextRequest } from "next/server"
 
 const prisma = new PrismaClient()
 
 // ✅ GET: ดึงข้อมูลสมาชิกตาม id
+// @ts-ignore
 export async function GET(
-  request: Request,
-  { params }: { params: any }
+  _req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    // รองรับทั้ง sync และ async params
-    const resolvedParams = await Promise.resolve(params)
-    const { id } = resolvedParams
-    
     const user = await prisma.subscriptions.findUnique({
-      where: { id: Number(id) },
+      where: { id: Number(params.id) },
     })
 
     if (!user) {
@@ -29,18 +27,16 @@ export async function GET(
 }
 
 // ✅ PUT: อัปเดตข้อมูลสมาชิก
+// @ts-ignore
 export async function PUT(
-  request: Request,
-  { params }: { params: any }
+  req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    // รองรับทั้ง sync และ async params
-    const resolvedParams = await Promise.resolve(params)
-    const { id } = resolvedParams
-    const body = await request.json()
+    const body = await req.json()
 
     const updated = await prisma.subscriptions.update({
-      where: { id: Number(id) },
+      where: { id: Number(params.id) },
       data: {
         name: body.name,
         tell: body.tell,
@@ -58,17 +54,14 @@ export async function PUT(
 }
 
 // ✅ DELETE: ลบข้อมูลสมาชิก
+// @ts-ignore
 export async function DELETE(
-  request: Request,
-  { params }: { params: any }
+  _req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    // รองรับทั้ง sync และ async params
-    const resolvedParams = await Promise.resolve(params)
-    const { id } = resolvedParams
-    
     await prisma.subscriptions.delete({
-      where: { id: Number(id) },
+      where: { id: Number(params.id) },
     })
 
     return NextResponse.json({ message: "Deleted" }, { status: 200 })
