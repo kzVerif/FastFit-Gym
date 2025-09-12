@@ -21,21 +21,27 @@ export async function DELETE(
 }
 
 // อัปเดตสมาชิก
-type RouteContext<T extends string> =
-  T extends `/users/[${infer Param}]`
-    ? { params: { [K in Param]: string } }
-    : never
-
 export async function PUT(
   req: NextRequest,
-  { params }: RouteContext<"/users/[id]">
+  { params }: { params: { id: string } }
 ) {
-  const body = await req.json()
+  try {
+    const body = await req.json()
 
-  const updated = await prisma.subscriptions.update({
-    where: { id: Number(params.id) },
-    data: body,
-  })
+    const updated = await prisma.subscriptions.update({
+      where: { id: Number(params.id) },
+      data: {
+        name: body.name,
+        tell: body.tell,
+        startDate: body.startDate ? new Date(body.startDate) : undefined,
+        endDate: body.endDate ? new Date(body.endDate) : undefined,
+        status: body.status,
+      },
+    })
 
-  return NextResponse.json(updated, { status: 200 })
+    return NextResponse.json(updated, { status: 200 })
+  } catch (error) {
+    console.error("PUT Error:", error)
+    return NextResponse.json({ error: "Update failed" }, { status: 500 })
+  }
 }
