@@ -27,6 +27,7 @@ export async function PUT(
 ) {
   try {
     const body = await req.json()
+
     const updated = await prisma.subscriptions.update({
       where: { id: Number(params.id) },
       data: {
