@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
-import type { NextRequest } from "next/server"
 
 const prisma = new PrismaClient()
 
 // ✅ GET: ดึงข้อมูลสมาชิกตาม id
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: Request,
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = context.params
     const user = await prisma.subscriptions.findUnique({
       where: { id: Number(id) },
     })
@@ -28,12 +27,12 @@ export async function GET(
 
 // ✅ PUT: อัปเดตข้อมูลสมาชิก
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: Request,
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
-    const body = await req.json()
+    const { id } = context.params
+    const body = await request.json()
 
     const updated = await prisma.subscriptions.update({
       where: { id: Number(id) },
@@ -55,11 +54,11 @@ export async function PUT(
 
 // ✅ DELETE: ลบข้อมูลสมาชิก
 export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  request: Request,
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = context.params
     await prisma.subscriptions.delete({
       where: { id: Number(id) },
     })
