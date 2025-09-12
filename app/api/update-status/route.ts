@@ -4,32 +4,15 @@ import type { NextRequest } from "next/server"
 
 const prisma = new PrismaClient()
 
-// ลบสมาชิก
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    await prisma.subscriptions.delete({
-      where: { id: Number(params.id) },
-    })
-    return NextResponse.json({ message: "Deleted" }, { status: 200 })
-  } catch (error) {
-    console.error("DELETE Error:", error)
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 })
-  }
-}
-
-// อัปเดตสมาชิก
 export async function PUT(
   req: NextRequest,
-  { params }: { params: Promise<{id: string}> }
+  { params }: { params: { id: string } }
 ) {
   try {
     const body = await req.json()
 
     const updated = await prisma.subscriptions.update({
-      where: { id: Number(await params) },
+      where: { id: Number(params.id) }, // ❌ ไม่ต้อง await เพราะ params ไม่ใช่ Promise
       data: {
         name: body.name,
         tell: body.tell,
