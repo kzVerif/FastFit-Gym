@@ -43,7 +43,7 @@ export async function PUT(
     let status = body.status;
     if (endDate) {
       const now = new Date();
-      status = now > endDate ? "expired" : "active";
+      status = now > endDate ? "Expired" : "Active";
     }
 
     const updated = await prisma.subscriptions.update({
