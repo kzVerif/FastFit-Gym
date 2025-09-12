@@ -54,7 +54,7 @@ const components: { title: string; href: string; description: string }[] = [
 
 export function NavigationMenuDemo() {
   return (
-    <div className="flex items-center justify-center p-2 sticky">
+    <div className="flex items-center justify-center p-4 sticky top-0 z-50">
 
     <NavigationMenu viewport={false} >
       <NavigationMenuList>
