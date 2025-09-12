@@ -33,23 +33,34 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const body = await req.json()
+    const body = await req.json();
+
+    // ✅ สร้างวันที่จาก body
+    const startDate = body.startDate ? new Date(body.startDate) : undefined;
+    const endDate = body.endDate ? new Date(body.endDate) : undefined;
+
+    // ✅ logic เช็คสถานะ
+    let status = body.status;
+    if (endDate) {
+      const now = new Date();
+      status = now > endDate ? "expired" : "active";
+    }
 
     const updated = await prisma.subscriptions.update({
       where: { id: Number(params.id) },
       data: {
         name: body.name,
         tell: body.tell,
-        startDate: body.startDate ? new Date(body.startDate) : undefined,
-        endDate: body.endDate ? new Date(body.endDate) : undefined,
-        status: body.status,
+        startDate,
+        endDate,
+        status,
       },
-    })
+    });
 
-    return NextResponse.json(updated, { status: 200 })
+    return NextResponse.json(updated, { status: 200 });
   } catch (error) {
-    console.error("PUT Error:", error)
-    return NextResponse.json({ error: "Update failed" }, { status: 500 })
+    console.error("PUT Error:", error);
+    return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }
 
