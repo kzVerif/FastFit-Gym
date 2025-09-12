@@ -54,7 +54,6 @@ export async function PUT(
 }
 
 // ✅ DELETE: ลบข้อมูลสมาชิก
-// @ts-ignore
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
