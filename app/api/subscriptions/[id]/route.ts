@@ -1,32 +1,42 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
-import type { NextRequest } from "next/server"
 
 const prisma = new PrismaClient()
 
-type RouteContext = {
-  params: { id: string }
+interface RouteContext {
+  params: Promise<{ id: string }>
 }
 
-// ลบสมาชิก
-export async function DELETE(req: NextRequest, context: RouteContext) {
+// ✅ GET: ดึงข้อมูลสมาชิกตาม id
+export async function GET(
+  request: Request,
+  context: RouteContext
+) {
   try {
-    const { id } = context.params
-    await prisma.subscriptions.delete({
+    const { id } = await context.params
+    const user = await prisma.subscriptions.findUnique({
       where: { id: Number(id) },
     })
-    return NextResponse.json({ message: "Deleted" }, { status: 200 })
+
+    if (!user) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 })
+    }
+
+    return NextResponse.json(user, { status: 200 })
   } catch (error) {
-    console.error("DELETE Error:", error)
-    return NextResponse.json({ error: "Delete failed" }, { status: 500 })
+    console.error("GET Error:", error)
+    return NextResponse.json({ error: "Fetch failed" }, { status: 500 })
   }
 }
 
-// อัปเดตสมาชิก
-export async function PUT(req: NextRequest, context: RouteContext) {
+// ✅ PUT: อัปเดตข้อมูลสมาชิก
+export async function PUT(
+  request: Request,
+  context: RouteContext
+) {
   try {
-    const { id } = context.params
-    const body = await req.json()
+    const { id } = await context.params
+    const body = await request.json()
 
     const updated = await prisma.subscriptions.update({
       where: { id: Number(id) },
@@ -43,5 +53,23 @@ export async function PUT(req: NextRequest, context: RouteContext) {
   } catch (error) {
     console.error("PUT Error:", error)
     return NextResponse.json({ error: "Update failed" }, { status: 500 })
+  }
+}
+
+// ✅ DELETE: ลบข้อมูลสมาชิก
+export async function DELETE(
+  request: Request,
+  context: RouteContext
+) {
+  try {
+    const { id } = await context.params
+    await prisma.subscriptions.delete({
+      where: { id: Number(id) },
+    })
+
+    return NextResponse.json({ message: "Deleted" }, { status: 200 })
+  } catch (error) {
+    console.error("DELETE Error:", error)
+    return NextResponse.json({ error: "Delete failed" }, { status: 500 })
   }
 }
