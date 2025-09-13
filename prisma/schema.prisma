@@ -21,3 +21,10 @@ model Subscriptions {
   endDate   DateTime                        // วันที่หมดอายุ
   status    String   @db.VarChar(20)      // Active / inactive
 }
+
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  password String
+  name     String?
+}
